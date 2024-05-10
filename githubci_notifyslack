@@ -1,0 +1,47 @@
+    - name: Notify Slack on Start
+      uses: 8398a7/action-slack@v3
+      with:
+        status: custom
+        fields: workflow,job,commit
+        custom_payload: |
+          {
+            "attachments": [{
+              "color": "#FFA500",
+              "text": `Deployment started for ${{ github.repository }} on ${{ env.ENVIRONMENT }}`
+            }]
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+    - name: Notify Slack on Success
+      if: success()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: custom
+        fields: workflow,job,commit
+        custom_payload: |
+          {
+            "attachments": [{
+              "color": "#36a64f",
+              "text": `Deployment successful for ${{ github.repository }} to ${{ env.ENVIRONMENT }}: ${{ env.GCR_REGISTRY }}/$GCR_REPOSITORY:$BRANCH_NAME-$RUN_NUMBER`
+            }]
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+    - name: Notify Slack on Failure
+      if: failure()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: custom
+        fields: workflow,job,commit
+        custom_payload: |
+          {
+            "attachments": [{
+              "color": "#FF0000",
+              "text": `Deployment failed for ${{ github.repository }} to ${{ env.ENVIRONMENT }}. Check the logs for details.`
+            }]
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
